@@ -23,33 +23,62 @@
 
 ---
 
+## 📂 Output Example
+```
+🚀 PROJECTDUMP
+========================================
+🌐 Select language (en/vi): en
+📂 Enter the project folder path: /path/to/your/project
+🔍 Analyzing project at: /path/to/your/project
+🔍 Scanning directories...
+🛠️  Detected technologies: python
+📁 Extensions included: .py, .pyi, .pyx
+📁 Generating directory tree...
+📄 Processing files...
+  📝 Processing: aggregator.py
+  📝 Processing: constants.py
+  📝 Processing: detector.py
+  📝 Processing: filters.py
+  📝 Processing: one_file_version.py
+  📝 Processing: tree_generator.py
+  📝 Processing: __main__.py
+
+✅ Success! File created: /path/to/your/project/source_dump.txt
+
+📊 Summary:
+   - Files processed: 7
+   - Output size: 30275 characters (~28 KB)
+   - Total lines: 870
+
+🎉 Done! The source_dump.txt file is ready.
+```
 
 Inside `source_dump.txt`demo:
 ```text
-# SOURCE CODE DUMP
 # ==================================================
-# Path: C:\Users\ASUS\Desktop\projectdump_refactored\New folder
+# Path: /path/to/your/project
 # Detected tech: python
 # ==================================================
 
 ## DIRECTORY STRUCTURE
 
-my_project/
-├── src/
-│ ├── main.py
-│ └── helper.py
-├── requirements.txt
-└── README.md
+New folder/
+├── __pycache__/
+├── __main__.py
+├── aggregator.py
+├── constants.py
+├── detector.py
+├── filters.py
+├── one_file_version.py
+├── source_dump.txt
+└── tree_generator.py
 
 ## FILE CONTENTS
 
-### Main.py
+### __main__.py
+
 import os
-def main():
-
-if __name__ == "__main__":
-    main()
-
+...
 ```
 
 ## 🚀 Usage
