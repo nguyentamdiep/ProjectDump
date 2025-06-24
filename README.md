@@ -24,7 +24,8 @@
 ---
 
 ## 📂 Output Example
-```
+
+```txt
 🚀 PROJECTDUMP
 ========================================
 🌐 Select language (en/vi): en
@@ -54,6 +55,7 @@
 ```
 
 Inside `source_dump.txt`demo:
+
 ```text
 # ==================================================
 # Path: /path/to/your/project
@@ -82,12 +84,15 @@ import os
 ```
 
 ## 🚀 Usage
+
 Run from the command line:
+
 ```bash
   python main.py /path/to/your/project
 ```
 
 ## 📁 What It Ignores
+
 - **Dependency folders**: node_modules, venv, etc.
 
 - **Media & binaries**: .jpg, .exe, .log, etc.
@@ -97,8 +102,9 @@ Run from the command line:
 - **Large files over 100MB**
 
 ## ✅ Requirements
+
 Python 3.x
 
 ## 🤝 Contributing
-Feel free to fork and contribute to enhance tech detection, support new stacks, or improve output formatting!
 
+Feel free to fork and contribute to enhance tech detection, support new stacks, or improve output formatting!

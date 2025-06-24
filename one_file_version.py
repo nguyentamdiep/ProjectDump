@@ -2,56 +2,69 @@ import os
 import sys
 from pathlib import Path
 import fnmatch
+from typing import Set, List, Dict
 
-MAX_FILE_SIZE = 100 * 1024 * 1024   # 100 MB
+MAX_FILE_SIZE = 100 * 1024 * 1024  # 100 MB
 
-def detect_project_tech(project_path):
+
+def detect_project_tech(project_path: str) -> List[str]:
     """Tự động phát hiện công nghệ dự án dựa trên các file đặc trưng, hỗ trợ glob"""
-    tech_indicators = {
-        'python': ['requirements.txt', 'setup.py', 'pyproject.toml', 'Pipfile', '*.py', '*.ipynb'],
-        'javascript': ['package.json', '*.js'],
-        'typescript': ['tsconfig.json', '*.ts'],
-        'react': ['*.jsx', '*.tsx', 'react.config.js'],
-        'vue': ['vue.config.js', '*.vue'],
-        'svelte': ['svelte.config.js', '*.svelte'],
-        'nextjs': ['next.config.js', 'pages/**/*.js', 'pages/**/*.jsx', 'pages/**/*.ts', 'pages/**/*.tsx'],
-        'nuxt': ['nuxt.config.js'],
-        'angular': ['angular.json', 'main.ts'],
-
-        'flutter': ['pubspec.yaml', '*.dart'],
-        'android': ['build.gradle', 'AndroidManifest.xml'],
-        'ios': ['*.xcodeproj', '*.xcworkspace'],
-
-        'java': ['pom.xml', '*.java'],
-        'kotlin': ['*.kt'],
-        'csharp': ['*.csproj', 'Program.cs'],
-        'php': ['composer.json'],
-        'ruby': ['Gemfile'],
-        'go': ['go.mod'],
-        'rust': ['Cargo.toml'],
-        'elixir': ['mix.exs'],
-        'dart': ['pubspec.yaml'],
-        'r': ['*.R', '*.Rproj'],
-        'scala': ['build.sbt'],
-        'docker': ['Dockerfile'],
-        'kubernetes': ['k8s/', 'helm/'],
-        'terraform': ['*.tf'],
-        'ansible': ['ansible.cfg'],
-        'github_actions': ['.github/workflows/'],
-        'gitlab_ci': ['.gitlab-ci.yml'],
-        'circleci': ['.circleci/config.yml'],
-        'deno': ['deno.json'],
-        'bun': ['bun.lockb'],
+    tech_indicators: Dict[str, List[str]] = {
+        "python": [
+            "requirements.txt",
+            "setup.py",
+            "pyproject.toml",
+            "Pipfile",
+            "*.py",
+            "*.ipynb",
+        ],
+        "javascript": ["package.json", "*.js"],
+        "typescript": ["tsconfig.json", "*.ts"],
+        "react": ["*.jsx", "*.tsx", "react.config.js"],
+        "vue": ["vue.config.js", "*.vue"],
+        "svelte": ["svelte.config.js", "*.svelte"],
+        "nextjs": [
+            "next.config.js",
+            "pages/**/*.js",
+            "pages/**/*.jsx",
+            "pages/**/*.ts",
+            "pages/**/*.tsx",
+        ],
+        "nuxt": ["nuxt.config.js"],
+        "angular": ["angular.json", "main.ts"],
+        "flutter": ["pubspec.yaml", "*.dart"],
+        "android": ["build.gradle", "AndroidManifest.xml"],
+        "ios": ["*.xcodeproj", "*.xcworkspace"],
+        "java": ["pom.xml", "*.java"],
+        "kotlin": ["*.kt"],
+        "csharp": ["*.csproj", "Program.cs"],
+        "php": ["composer.json"],
+        "ruby": ["Gemfile"],
+        "go": ["go.mod"],
+        "rust": ["Cargo.toml"],
+        "elixir": ["mix.exs"],
+        "dart": ["pubspec.yaml"],
+        "r": ["*.R", "*.Rproj"],
+        "scala": ["build.sbt"],
+        "docker": ["Dockerfile"],
+        "kubernetes": ["k8s/", "helm/"],
+        "terraform": ["*.tf"],
+        "ansible": ["ansible.cfg"],
+        "github_actions": [".github/workflows/"],
+        "gitlab_ci": [".gitlab-ci.yml"],
+        "circleci": [".circleci/config.yml"],
+        "deno": ["deno.json"],
+        "bun": ["bun.lockb"],
     }
 
-    detected_techs = set()
+    detected_techs: Set[str] = set()
 
-    for root, dirs, files in os.walk(project_path):
+    for root, _, files in os.walk(project_path):
         rel_root = os.path.relpath(root, project_path)
         for tech, patterns in tech_indicators.items():
             for pattern in patterns:
                 if "**" in pattern or "*" in pattern:
-                    full_path = os.path.join(rel_root, '').replace("\\", "/")
+                    full_path = os.path.join(rel_root, "").replace("\\", "/")
                     for file in files:
                         file_path = os.path.join(full_path, file)
                         if fnmatch.fnmatchcase(file_path, pattern):
@@ -62,327 +75,371 @@ def detect_project_tech(project_path):
                             detected_techs.add(tech)
 
         # Extra logic: add implied techs
-        if 'nextjs' in detected_techs:
-            detected_techs.update(['react', 'javascript', 'typescript'])
-        if 'nuxt' in detected_techs:
-            detected_techs.update(['vue', 'javascript', 'typescript'])
+        if "nextjs" in detected_techs:
+            detected_techs.update(set(["react", "javascript", "typescript"]))
+        if "nuxt" in detected_techs:
+            detected_techs.update(set(["vue", "javascript", "typescript"]))
 
-    return sorted(detected_techs)
+    return sorted(list(detected_techs))
 
 
-def get_extensions_by_tech(techs):
-    tech_extensions = {
+def get_extensions_by_tech(techs: List[str]) -> Set[str]:
+    tech_extensions: Dict[str, List[str]] = {
         # Python & Data Science
-        'python': ['.py', '.pyx', '.pyi'],
-        'jupyter': ['.ipynb'],
-        'r': ['.r', '.R', '.Rmd', '.Rproj'],
-
+        "python": [".py", ".pyx", ".pyi"],
+        "jupyter": [".ipynb"],
+        "r": [".r", ".R", ".Rmd", ".Rproj"],
         # JavaScript & Frontend
-        'javascript': ['.js', '.jsx', '.mjs', '.cjs'],
-        'typescript': ['.ts', '.tsx'],
-        'react': ['.jsx', '.tsx', '.js', '.ts'],
-        'vue': ['.vue', '.js', '.ts'],
-        'svelte': ['.svelte'],
-        'angular': ['.ts', '.js', '.html', '.scss'],
-        'nextjs': ['.js', '.jsx', '.ts', '.tsx'],
-        'nuxt': ['.vue', '.js', '.ts'],
-
+        "javascript": [".js", ".jsx", ".mjs", ".cjs"],
+        "typescript": [".ts", ".tsx"],
+        "react": [".jsx", ".tsx", ".js", ".ts"],
+        "vue": [".vue", ".js", ".ts"],
+        "svelte": [".svelte"],
+        "angular": [".ts", ".js", ".html", ".scss"],
+        "nextjs": [".js", ".jsx", ".ts", ".tsx"],
+        "nuxt": [".vue", ".js", ".ts"],
         # Mobile
-        'flutter': ['.dart'],
-        'android': ['.java', '.kt', '.xml'],
-        'ios': ['.swift', '.m', '.mm', '.h', '.xib', '.storyboard'],
-
+        "flutter": [".dart"],
+        "android": [".java", ".kt", ".xml"],
+        "ios": [".swift", ".m", ".mm", ".h", ".xib", ".storyboard"],
         # Backend & Dev
-        'java': ['.java', '.kt'],
-        'kotlin': ['.kt', '.kts'],
-        'csharp': ['.cs', '.vb'],
-        'php': ['.php'],
-        'ruby': ['.rb', '.erb'],
-        'go': ['.go'],
-        'rust': ['.rs'],
-        'elixir': ['.ex', '.exs'],
-        'dart': ['.dart'],
-        'scala': ['.scala', '.sc'],
-
+        "java": [".java", ".kt"],
+        "kotlin": [".kt", ".kts"],
+        "csharp": [".cs", ".vb"],
+        "php": [".php"],
+        "ruby": [".rb", ".erb"],
+        "go": [".go"],
+        "rust": [".rs"],
+        "elixir": [".ex", ".exs"],
+        "dart": [".dart"],
+        "scala": [".scala", ".sc"],
         # Infrastructure
-        'docker': ['Dockerfile', '.dockerignore'],
-        'kubernetes': ['.yaml', '.yml'],
-        'terraform': ['.tf', '.tf.json'],
-        'ansible': ['.yml', '.yaml'],
-
+        "docker": ["Dockerfile", ".dockerignore"],
+        "kubernetes": [".yaml", ".yml"],
+        "terraform": [".tf", ".tf.json"],
+        "ansible": [".yml", ".yaml"],
         # CI/CD
-        'github_actions': ['.yml'],
-        'gitlab_ci': ['.yml'],
-        'circleci': ['.yml'],
-
+        "github_actions": [".yml"],
+        "gitlab_ci": [".yml"],
+        "circleci": [".yml"],
         # Runtime Environments
-        'nodejs': ['.js', '.mjs', '.cjs'],
-        'bun': ['.js', '.ts', '.jsx', '.tsx'],
-        'deno': ['.ts', '.tsx', '.js'],
-
+        "nodejs": [".js", ".mjs", ".cjs"],
+        "bun": [".js", ".ts", ".jsx", ".tsx"],
+        "deno": [".ts", ".tsx", ".js"],
         # Config
-        'json': ['.json'],
-        'yaml': ['.yml', '.yaml'],
-        'toml': ['.toml'],
-        'xml': ['.xml'],
+        "json": [".json"],
+        "yaml": [".yml", ".yaml"],
+        "toml": [".toml"],
+        "xml": [".xml"],
     }
 
-
-    extensions = set()
+    extensions: Set[str] = set()
     for tech in techs:
         if tech in tech_extensions:
-            extensions.update(tech_extensions[tech])
-    
+            extensions.update(set(tech_extensions[tech]))
+
     return extensions
 
-def get_essential_files():
+
+def get_essential_files() -> Set[str]:
     """Chỉ lấy các file mã nguồn, không lấy config"""
     return set()  # Không lấy file config
 
-def get_exclude_patterns():
-    exclude_dirs = {
-    # Dependencies & environments
-    'node_modules', 'vendor', 'venv', 'env', '.venv', '.env', '.mypy_cache', '.ruff_cache', '.pytest_cache', '__pycache__', 
-    '.cache', 'pip-wheel-metadata', 'site-packages', 'deps', 'packages', '.tox',
 
-    # Build artifacts
-    'dist', 'build', 'target', 'out', 'bin', 'obj', '.eggs', 'lib', 'lib64', 'generated',
-
-    # Framework build folders
-    '.next', '.nuxt', '.angular', 'coverage', '.turbo', '.vercel', '.expo', '.parcel-cache',
-
-    # Version control & IDE tools
-    '.git', '.svn', '.hg', '.idea', '.vscode', '.vs', '.history', '.vscode-test',
-
-    # Temp & OS folders
-    'temp', 'tmp', '.tmp', '.DS_Store', '__MACOSX', 'Thumbs.db', 'System Volume Information',
-
-    # CI/CD & Docker volumes
-    '.github', '.gitlab', '.circleci', '.docker', 'logs', 'log', 'docker', 'containers',
-
-    # Database & sessions
-    'db', 'database', 'sqlite', 'sessions', 'flask_session', 'instance',
+def get_exclude_patterns() -> Dict[str, Set[str]]:
+    exclude_dirs: Set[str] = {
+        # Dependencies & environments
+        "node_modules",
+        "vendor",
+        "venv",
+        "env",
+        ".venv",
+        ".env",
+        ".mypy_cache",
+        ".ruff_cache",
+        ".pytest_cache",
+        "__pycache__",
+        ".cache",
+        "pip-wheel-metadata",
+        "site-packages",
+        "deps",
+        "packages",
+        ".tox",
+        # Build artifacts
+        "dist",
+        "build",
+        "target",
+        "out",
+        "bin",
+        "obj",
+        ".eggs",
+        "lib",
+        "lib64",
+        "generated",
+        # Framework build folders
+        ".next",
+        ".nuxt",
+        ".angular",
+        "coverage",
+        ".turbo",
+        ".vercel",
+        ".expo",
+        ".parcel-cache",
+        # Version control & IDE tools
+        ".git",
+        ".svn",
+        ".hg",
+        ".idea",
+        ".vscode",
+        ".vs",
+        ".history",
+        ".vscode-test",
+        # Temp & OS folders
+        "temp",
+        "tmp",
+        ".tmp",
+        ".DS_Store",
+        "__MACOSX",
+        "Thumbs.db",
+        "System Volume Information",
+        # CI/CD & Docker volumes
+        ".github",
+        ".gitlab",
+        ".circleci",
+        ".docker",
+        "logs",
+        "log",
+        "docker",
+        "containers",
+        # Database & sessions
+        "db",
+        "database",
+        "sqlite",
+        "sessions",
+        "flask_session",
+        "instance",
     }
 
-    exclude_files = {
+    exclude_files: Set[str] = {
         # Logs
-        '*.log', '*.log.*', '*.out',
-
+        "*.log",
+        "*.log.*",
+        "*.out",
         # Package manager lock files
-        'package-lock.json', 'yarn.lock', 'pnpm-lock.yaml', 'composer.lock', 'poetry.lock', 'Cargo.lock',
-
+        "package-lock.json",
+        "yarn.lock",
+        "pnpm-lock.yaml",
+        "composer.lock",
+        "poetry.lock",
+        "Cargo.lock",
         # Compiled/intermediate binaries
-        '*.pyc', '*.pyo', '*.pyd', '*.class', '*.o', '*.so', '*.dll', '*.exe', '*.dylib', '*.a',
-
+        "*.pyc",
+        "*.pyo",
+        "*.pyd",
+        "*.class",
+        "*.o",
+        "*.so",
+        "*.dll",
+        "*.exe",
+        "*.dylib",
+        "*.a",
         # Media files
-        '*.jpg', '*.jpeg', '*.png', '*.gif', '*.svg', '*.ico', '*.webp',
-        '*.mp3', '*.wav', '*.mp4', '*.avi', '*.mov', '*.mkv', '*.flac', '*.ogg',
-
+        "*.jpg",
+        "*.jpeg",
+        "*.png",
+        "*.gif",
+        "*.svg",
+        "*.ico",
+        "*.webp",
+        "*.mp3",
+        "*.wav",
+        "*.mp4",
+        "*.avi",
+        "*.mov",
+        "*.mkv",
+        "*.flac",
+        "*.ogg",
         # Fonts
-        '*.ttf', '*.otf', '*.woff', '*.woff2',
-
+        "*.ttf",
+        "*.otf",
+        "*.woff",
+        "*.woff2",
         # Archives & compressed
-        '*.zip', '*.tar', '*.gz', '*.rar', '*.7z', '*.bz2', '*.xz', '*.lz', '*.lzma',
-
+        "*.zip",
+        "*.tar",
+        "*.gz",
+        "*.rar",
+        "*.7z",
+        "*.bz2",
+        "*.xz",
+        "*.lz",
+        "*.lzma",
         # Office / documents
-        '*.pdf', '*.docx', '*.doc', '*.ppt', '*.pptx', '*.xls', '*.xlsx', '*.csv',
-
+        "*.pdf",
+        "*.docx",
+        "*.doc",
+        "*.ppt",
+        "*.pptx",
+        "*.xls",
+        "*.xlsx",
+        "*.csv",
         # OS/system files
-        '.DS_Store', 'Thumbs.db', 'desktop.ini', 'ehthumbs.db', 'Icon\r',
-
+        ".DS_Store",
+        "Thumbs.db",
+        "desktop.ini",
+        "ehthumbs.db",
+        "Icon\r",
         # Misc config/cache
-        '*.env', '*.env.*', '*.ini', '*.toml', '*.bak', '*.swp', '*.swo',
+        "*.env",
+        "*.env.*",
+        "*.ini",
+        "*.toml",
+        "*.bak",
+        "*.swp",
+        "*.swo",
     }
 
-    
-    return exclude_dirs, exclude_files
+    return {"dirs": exclude_dirs, "files": exclude_files}
 
-def should_exclude_path(path, exclude_dirs):
-    """Kiểm tra xem đường dẫn có nên bị loại trừ không"""
+
+def should_exclude_path(path: str, exclude_dirs: Set[str]) -> bool:
+    """Check if a path should be excluded based on directory patterns"""
     path_parts = Path(path).parts
-    return any(part.lower() in exclude_dirs for part in path_parts)
+    return any(part in exclude_dirs for part in path_parts)
 
-def should_exclude_file(filename, exclude_files):
-    """Kiểm tra xem file có nên bị loại trừ không"""
-    filename_lower = filename.lower()
+
+def should_exclude_file(filename: str, exclude_files: Set[str]) -> bool:
+    """Check if a file should be excluded based on file patterns"""
+    filename_lower: str = filename.lower()
     return any(
-        filename_lower == pattern.lower() or 
-        (pattern.startswith('*.') and filename_lower.endswith(pattern[2:].lower()))
+        filename_lower.startswith(pattern.lower())
+        or filename_lower.endswith(pattern.lower())
         for pattern in exclude_files
     )
 
-def generate_directory_tree(project_path, exclude_dirs):
-    """Tạo cây thư mục đầy đủ - thư mục thư viện chỉ hiển thị tên, không hiển thị file bên trong"""
-    tree_lines = []
-    project_name = os.path.basename(project_path.rstrip(os.sep))
-    tree_lines.append(f"{project_name}/")
-    
-    def add_directory_content(current_path, prefix=""):
+
+def generate_directory_tree(
+    project_path: str, exclude_dirs: Set[str]
+) -> List[str]:
+    """Generate a directory tree structure"""
+    project_name: str = os.path.basename(project_path.rstrip("/"))
+    tree: List[str] = []
+    tree.append(project_name)
+
+    def add_directory_content(current_path: str, prefix: str = "") -> None:
+        items: List[str] = sorted(os.listdir(current_path))
+        dirs: List[str] = []
+        files: List[str] = []
+
+        for item in items:
+            item_path = os.path.join(current_path, item)
+            if os.path.isdir(item_path):
+                dirs.append(item)
+            elif os.path.isfile(item_path):
+                files.append(item)
+
+        # Add directories
+        for d in dirs:
+            dir_path = os.path.join(current_path, d)
+            if not should_exclude_path(dir_path, exclude_dirs):
+                dirname = os.path.basename(dir_path)
+                tree.append(f"{prefix}├── {dirname}/")
+                add_directory_content(dir_path, prefix + "│   ")
+
+        # Add files
+        for f in files:
+            file_path = os.path.join(current_path, f)
+            if not should_exclude_file(f, get_exclude_patterns()["files"]):
+                filename = os.path.basename(file_path)
+                tree.append(f"{prefix}├── {filename}")
+
+    add_directory_content(project_path)
+    return tree
+
+
+def aggregate_code(
+    project_path: str, exclude_dirs: Set[str], exclude_files: Set[str]
+) -> str:
+    """Aggregate code from all files in the project"""
+    code_content: List[str] = []
+    code_content.append("# Project Code Summary\n\n")
+
+    def process_file(file_path: str) -> None:
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                content = f.read()
+                if content.strip():
+                    code_content.append(f"\n## {os.path.basename(file_path)}\n")
+                    code_content.append("```\n")
+                    code_content.append(content)
+                    code_content.append("\n```\n")
+        except Exception as e:
+            code_content.append(f"\n## {os.path.basename(file_path)}\n")
+            code_content.append(f"Error reading file: {str(e)}\n")
+
+    def process_directory(current_path: str) -> None:
         try:
             items = sorted(os.listdir(current_path))
-            dirs = [item for item in items if os.path.isdir(os.path.join(current_path, item))]
-            files = [item for item in items if os.path.isfile(os.path.join(current_path, item))]
-            
-            # Hiển thị thư mục
-            for i, dirname in enumerate(dirs):
-                is_last_dir = (i == len(dirs) - 1) and len(files) == 0
-                
-                # Kiểm tra xem có phải thư mục thư viện không
-                if dirname.lower() in exclude_dirs:
-                    tree_lines.append(f"{prefix}{'└── ' if is_last_dir else '├── '}{dirname}/")
-                    continue  # Không duyệt vào bên trong thư mục thư viện
-                else:
-                    tree_lines.append(f"{prefix}{'└── ' if is_last_dir else '├── '}{dirname}/")
-                    next_prefix = prefix + ("    " if is_last_dir else "│   ")
-                    add_directory_content(os.path.join(current_path, dirname), next_prefix)
-            
-            # Hiển thị files
-            for i, filename in enumerate(files):
-                is_last = i == len(files) - 1
-                tree_lines.append(f"{prefix}{'└── ' if is_last else '├── '}{filename}")
-                
-        except PermissionError:
-            tree_lines.append(f"{prefix}├── [Permission Denied]")
-    
-    add_directory_content(project_path)
-    return "\n".join(tree_lines)
+            for item in items:
+                item_path = os.path.join(current_path, item)
+                if os.path.isdir(item_path):
+                    if not should_exclude_path(item_path, exclude_dirs):
+                        process_directory(item_path)
+                elif os.path.isfile(item_path):
+                    if not should_exclude_file(item, exclude_files):
+                        process_file(item_path)
+        except Exception as e:
+            code_content.append(
+                f"\nError processing directory {current_path}: {str(e)}\n"
+            )
 
-def aggregate_code(project_path):
-    """Hàm chính để tổng hợp code"""
+    process_directory(project_path)
+    return "\n".join(code_content)
+
+
+def main() -> None:
+    """Main function to process the project"""
+    if len(sys.argv) != 2:
+        print("Usage: python script.py <project_path>")
+        sys.exit(1)
+
+    project_path = sys.argv[1]
     if not os.path.isdir(project_path):
-        print(f"❌ Lỗi: Thư mục '{project_path}' không tồn tại!")
-        return False
+        print(f"Error: Directory '{project_path}' does not exist!")
+        sys.exit(1)
 
-    print(f"🔍 Đang phân tích dự án tại: {project_path}")
-    print("🔍 Đang quét thư mục...")
+    print(f"Analyzing project at: {project_path}")
+    print("Scanning directories...")
 
-    # Phát hiện công nghệ
+    # Detect technologies
     detected_techs = detect_project_tech(project_path)
     if detected_techs:
-        print(f"🛠️  Phát hiện công nghệ: {', '.join(detected_techs)}")
+        print(f"Detected technologies: {', '.join(detected_techs)}")
     else:
-        print("⚠️  Không phát hiện được công nghệ cụ thể, sử dụng tất cả file code")
+        print("No specific technologies detected, using all code files")
 
-    # Lấy extensions cần thiết
+    # Get extensions and patterns
     target_extensions = get_extensions_by_tech(detected_techs)
-    essential_files = get_essential_files()
-    exclude_dirs, exclude_files = get_exclude_patterns()
+    exclude_patterns = get_exclude_patterns()
+    exclude_dirs = exclude_patterns["dirs"]
+    exclude_files = exclude_patterns["files"]
 
-    print(f"📁 Extensions sẽ được bao gồm: {', '.join(sorted(target_extensions))}")
+    print(f"Including extensions: {', '.join(sorted(target_extensions))}")
 
-    # Tạo nội dung tổng hợp
-    content_lines = []
+    # Generate directory tree and code content
+    print("Processing project...")
+    code_content = aggregate_code(project_path, exclude_dirs, exclude_files)
 
-    # Header
-    content_lines.append("# TỔNG HỢP MÃ NGUỒN DỰ ÁN")
-    content_lines.append("# " + "="*50)
-    content_lines.append(f"# Đường dẫn: {project_path}")
-    content_lines.append(f"# Công nghệ phát hiện: {', '.join(detected_techs) if detected_techs else 'Không xác định'}")
-    content_lines.append("# " + "="*50)
-    content_lines.append("")
-
-    print("📁 Đang tạo cây thư mục...")
-    # Cây thư mục
-    content_lines.append("## CẤU TRÚC THƯ MỤC")
-    content_lines.append("```")
-    content_lines.append(generate_directory_tree(project_path, exclude_dirs))
-    content_lines.append("```")
-    content_lines.append("")
-
-    # Tổng hợp files
-    print("📄 Đang xử lý các tệp...")
-    content_lines.append("## NỘI DUNG CÁC FILE")
-    content_lines.append("")
-
-    file_count = 0
-    total_size = 0
-
-    for root, dirs, files in os.walk(project_path):
-        dirs[:] = [d for d in dirs if not should_exclude_path(os.path.join(root, d), exclude_dirs)]
-
-        for file in files:
-            file_path = os.path.join(root, file)
-            rel_path = os.path.relpath(file_path, project_path)
-
-            if should_exclude_path(rel_path, exclude_dirs) or should_exclude_file(file, exclude_files):
-                continue
-
-            file_ext = Path(file).suffix.lower()
-            is_target_ext = file_ext in target_extensions
-            if not is_target_ext:
-                continue
-
-            try:
-                file_size = os.path.getsize(file_path)
-                if file_size > MAX_FILE_SIZE:
-                    print(f"⚠️  Bỏ qua {rel_path} (kích thước {file_size:,} byte > giới hạn {MAX_FILE_SIZE:,} byte)")
-                    continue
-
-                print(f"  📝 Xử lý: {rel_path}")
-                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                    file_content = f.read()
-
-                content_lines.append(f"### {rel_path}")
-                content_lines.append("```" + (file_ext[1:] if file_ext else ""))
-                content_lines.append(file_content)
-                content_lines.append("```")
-                content_lines.append("")
-
-                file_count += 1
-                total_size += len(file_content)
-
-            except Exception as e:
-                content_lines.append(f"### {rel_path}")
-                content_lines.append(f"```\n# Lỗi đọc file: {str(e)}\n```")
-                content_lines.append("")
-
-    # Ghi file kết quả
+    # Write output
     output_path = os.path.join(project_path, "source_dump.txt")
-    final_content = '\n'.join(content_lines)
-
     try:
-        with open(output_path, 'w', encoding='utf-8') as f:
-            f.write(final_content)
-
-        with open(output_path, 'r', encoding='utf-8') as f:
-            line_count = sum(1 for _ in f)
-        print("")
-        print(f"✅ Thành công! Đã tạo file: {output_path}")
-        print("")
-        print(f"📊 Thống kê:")
-        print(f"   - Số file đã xử lý: {file_count}")
-        print(f"   - Kích thước file đầu ra: {len(final_content):,} ký tự (~{total_size // 1024} KB)")
-        print(f"   - Tổng số dòng: {line_count:,} dòng")
-        return True
-
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write(code_content)
+        print(f"Success! Created file: {output_path}")
     except Exception as e:
-        print(f"❌ Lỗi ghi file: {str(e)}")
-        return False
-
-
-def main():
-    """Hàm main"""
-    print("🚀 PROJECTDUMP")
-    print("="*40)
-    
-    if len(sys.argv) > 1:
-        project_path = sys.argv[1]
-    else:
-        project_path = input("📂 Nhập đường dẫn thư mục dự án: ").strip()
-        if not project_path:
-            project_path = os.getcwd()
-    
-    # Chuẩn hóa đường dẫn
-    project_path = os.path.abspath(project_path)
-    
-    # Thực hiện tổng hợp
-    success = aggregate_code(project_path)
-    
-    if success:
-        print("\n🎉 Hoàn thành! File source_dump.txt đã sẵn sàng.")
-    else:
-        print("\n💥 Có lỗi xảy ra trong quá trình xử lý.")
+        print(f"Error writing file: {str(e)}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
