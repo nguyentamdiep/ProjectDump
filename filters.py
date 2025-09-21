@@ -25,6 +25,7 @@ def get_exclude_patterns() -> Tuple[Set[str], Set[str]]:
         "deps",
         "packages",
         ".tox",
+        ".yarn",
         # Build artifacts
         "dist",
         "build",

@@ -90,7 +90,7 @@ def get_extensions_by_tech(techs: List[str]) -> Set[str]:
         # JavaScript & Frontend
         "javascript": [".js", ".jsx", ".mjs", ".cjs"],
         "typescript": [".ts", ".tsx"],
-        "react": [".jsx", ".tsx", ".js", ".ts"],
+        "react": [".jsx", ".tsx", ".js", ".ts", ".json"],
         "vue": [".vue", ".js", ".ts"],
         "svelte": [".svelte"],
         "angular": [".ts", ".js", ".html", ".scss"],
